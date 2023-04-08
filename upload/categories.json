@@ -1,0 +1,132 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Body Care",
+      "slug": "bodycare",
+      "image": {
+        "id": 1,
+        "thumbnail": "/images/category/body-care.png",
+        "original": "/images/category/body-care.png"
+      },
+      "icon": "/images/category/icon/fresh-vegetables.svg",
+      "children": [
+        {
+          "id": 1,
+          "name": "Arugula",
+          "slug": "arugula"
+        },
+        {
+          "id": 2,
+          "name": "Asparagus",
+          "slug": "asparagus"
+        },
+        {
+          "id": 3,
+          "name": "Beets",
+          "slug": "beets"
+        },
+        {
+          "id": 4,
+          "name": "Cabbages",
+          "slug": "cabbages"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Hair Care",
+      "slug": "haircare",
+      "image": {
+        "id": 1,
+        "thumbnail": "/images/category/hair-care.png",
+        "original": "/images/category/hair-care.png"
+      },
+      "icon": "/images/category/icon/diet-foods.svg",
+      "children": [
+        {
+          "id": 1,
+          "name": "Whole Eggs",
+          "slug": "whole-eggs"
+        },
+        {
+          "id": 2,
+          "name": "Boiled Potatoes",
+          "slug": "boiled-potatoes"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Skin Care",
+      "slug": "skincare",
+      "image": {
+        "id": 1,
+        "thumbnail": "/images/category/skin-care.png",
+        "original": "/images/category/skin-care.png"
+      },
+      "icon": "/images/category/icon/diet-nutrition.svg"
+    },
+    {
+      "id": 4,
+      "name": "Makeup Products",
+      "slug": "makeup",
+      "image": {
+        "id": 1,
+        "thumbnail": "/images/category/makeup.png",
+        "original": "/images/category/makeup.png"
+      },
+      "icon": "/images/category/icon/fast-food.svg",
+      "children": [
+        {
+          "id": 1,
+          "name": "Burger",
+          "slug": "burger"
+        },
+        {
+          "id": 2,
+          "name": "Beef Sandwich",
+          "slug": "beef-sandwich"
+        },
+        {
+          "id": 3,
+          "name": "Burrito Supreme",
+          "slug": "burrito-supreme"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "PHY",
+      "slug": "phy",
+      "image": {
+        "id": 1,
+        "thumbnail": "/images/category/phy.png",
+        "original": "/images/category/phy.png"
+      },
+      "icon": "/images/category/icon/fruits-items.svg",
+      "children": [
+        {
+          "id": 1,
+          "name": "Apples",
+          "slug": "apples"
+        },
+        {
+          "id": 2,
+          "name": "Melons",
+          "slug": "melons"
+        },
+        {
+          "id": 3,
+          "name": "Berries",
+          "slug": "berries"
+        },
+        {
+          "id": 4,
+          "name": "Citrus",
+          "slug": "citrus"
+        }
+      ]
+    }
+  ]
+}
