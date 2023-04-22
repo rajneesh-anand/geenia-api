@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgres://postgres:Mvemjsunp.9*@geenia-db.cdakxfoivwuc.ap-south-1.rds.amazonaws.com:5432/geenia"
+  url      = env("DATABASE_URL")
 }
 
 

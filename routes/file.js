@@ -1,37 +1,64 @@
 const express = require("express");
-const { IncomingForm } = require("formidable");
 const path = require("path");
-const router = express.Router();
 const { readFileSync } = require("fs");
+const { GoogleSpreadsheet } = require("google-spreadsheet");
 
-// router.post("/pricing", async (req, res) => {
-//   const data = await new Promise((resolve, reject) => {
-//     const form = new IncomingForm();
-//     form.parse(req, async (err, fields, files) => {
-//       if (err) return reject(err);
-//       resolve({ fields, files });
-//     });
-//   });
+const router = express.Router();
 
-//   const rawData = fs.readFileSync(data.files.uploadedFile.path);
+async function getProducts(sheetTitle) {
+  if (
+    !(
+      process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL &&
+      process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY &&
+      process.env.GOOGLE_SPREADSHEET_PRODUCTS
+    )
+  ) {
+    throw new Error("forbidden");
+  }
 
-//   try {
-//     fs.writeFile(
-//       path.join(__dirname, `../upload/pricing.json`),
-//       rawData,
-//       function (err) {
-//         if (err) console.log(err);
-//         return res.status(200).json({
-//           status: "success",
-//           message: "File uploaded successfully",
-//         });
-//       }
-//     );
-//   } catch (error) {
-//     console.log(error);
-//     res.json(error);
-//   }
-// });
+  const doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_PRODUCTS);
+  await doc.useServiceAccountAuth({
+    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL,
+    private_key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.replace(
+      /\\n/gm,
+      "\n"
+    ),
+  });
+  await doc.loadInfo();
+  const sheet = doc.sheetsByTitle[sheetTitle]; // or use doc.sheetsById[id]
+  const rows = await sheet.getRows(); // can pass in { limit, offset }
+
+  const products = rows?.map(
+    ({
+      id,
+      name,
+      slug,
+      image,
+      gallery,
+      description,
+      price,
+      sale_price,
+      unit,
+      quantity_in_stock,
+      tags,
+      category,
+    }) => ({
+      id,
+      name,
+      slug,
+      image,
+      gallery,
+      description,
+      price,
+      sale_price,
+      unit,
+      quantity_in_stock,
+      tags,
+      category,
+    })
+  );
+  return products;
+}
 
 router.get("/categories", (req, res) => {
   res.statusCode = 200;
@@ -39,63 +66,120 @@ router.get("/categories", (req, res) => {
   res.sendFile(path.join(__dirname, "../upload/categories.json"));
 });
 
-router.get("/products", (req, res) => {
-  const data = readFileSync(
-    path.join(__dirname, "../upload/products.json"),
-    "utf-8"
-  );
-  const products = JSON.parse(data);
-  res.status(200).json({ msg: "success", products: products });
+router.get("/products/bodycare", async (req, res) => {
+  try {
+    const data = await getProducts("body_care");
+    console.log(data);
+    return res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ products: null });
+  }
 });
 
-router.get("/related-products", (req, res) => {
-  res.statusCode = 200;
-  res.header("Content-Type", "application/json");
-  res.sendFile(path.join(__dirname, "../upload/related_products.json"));
+router.get("/products/skincare", async (req, res) => {
+  try {
+    const data = await getProducts("skin_care");
+    console.log(data);
+    return res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ products: null });
+  }
 });
 
-router.get("/product/:slug", (req, res) => {
+router.get("/products/haircare", async (req, res) => {
+  try {
+    const data = await getProducts("hair_care");
+    console.log(data);
+    return res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ products: null });
+  }
+});
+
+router.get("/products/makeup", async (req, res) => {
+  try {
+    const data = await getProducts("makeup");
+    console.log(data);
+    return res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ products: null });
+  }
+});
+
+router.get("/products/phy", async (req, res) => {
+  try {
+    const data = await getProducts("phy");
+    console.log(data);
+    return res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ products: null });
+  }
+});
+
+router.get("/product/bodycare/:slug", async (req, res) => {
   const product_slug = req.params.slug;
+  try {
+    const data = await getProducts("body_care");
+    const selectedProduct = data.find((item) => item.slug === product_slug);
 
-  const data = readFileSync(
-    path.join(__dirname, "../upload/products.json"),
-    "utf-8"
-  );
-  const products = JSON.parse(data);
-
-  const selectedProduct = products.find((item) => item.slug === product_slug);
-
-  res.status(200).json({ msg: "success", product: selectedProduct });
+    res.status(200).json({ product: selectedProduct });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ product: null });
+  }
 });
 
-router.get("/products/bodycare", (req, res) => {
-  res.statusCode = 200;
-  res.header("Content-Type", "application/json");
-  res.sendFile(path.join(__dirname, "../upload/bodycare.json"));
+router.get("/product/skincare/:slug", async (req, res) => {
+  const product_slug = req.params.slug;
+  try {
+    const data = await getProducts("skin_care");
+    const selectedProduct = data.find((item) => item.slug === product_slug);
+    res.status(200).json({ product: selectedProduct });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ product: null });
+  }
 });
 
-router.get("/products/skincare", (req, res) => {
-  res.statusCode = 200;
-  res.header("Content-Type", "application/json");
-  res.sendFile(path.join(__dirname, "../upload/skincare.json"));
+router.get("/product/haircare/:slug", async (req, res) => {
+  const product_slug = req.params.slug;
+  try {
+    const data = await getProducts("hair_care");
+    const selectedProduct = data.find((item) => item.slug === product_slug);
+    res.status(200).json({ product: selectedProduct });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ product: null });
+  }
 });
 
-router.get("/products/haircare", (req, res) => {
-  res.statusCode = 200;
-  res.header("Content-Type", "application/json");
-  res.sendFile(path.join(__dirname, "../upload/haircare.json"));
+router.get("/product/makeup/:slug", async (req, res) => {
+  const product_slug = req.params.slug;
+  try {
+    const data = await getProducts("makeup");
+    const selectedProduct = data.find((item) => item.slug === product_slug);
+    res.status(200).json({ product: selectedProduct });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ product: null });
+  }
 });
 
-router.get("/products/makeup", (req, res) => {
-  res.statusCode = 200;
-  res.header("Content-Type", "application/json");
-  res.sendFile(path.join(__dirname, "../upload/makeup.json"));
-});
-
-router.get("/products/phy", (req, res) => {
-  res.statusCode = 200;
-  res.header("Content-Type", "application/json");
-  res.sendFile(path.join(__dirname, "../upload/phy.json"));
+router.get("/product/phy/:slug", async (req, res) => {
+  const product_slug = req.params.slug;
+  try {
+    const data = await getProducts("phy");
+    const selectedProduct = data.find((item) => item.slug === product_slug);
+    res.status(200).json({ product: selectedProduct });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ product: null });
+  }
 });
 
 module.exports = router;

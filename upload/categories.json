@@ -9,27 +9,57 @@
         "thumbnail": "/images/category/body-care.png",
         "original": "/images/category/body-care.png"
       },
-      "icon": "/images/category/icon/fresh-vegetables.svg",
+      "icon": "/images/category/icons/bodycare.svg",
       "children": [
         {
           "id": 1,
-          "name": "Arugula",
-          "slug": "arugula"
+          "name": "Body Butter",
+          "slug": "body-butter"
         },
         {
           "id": 2,
-          "name": "Asparagus",
-          "slug": "asparagus"
+          "name": "Body Lotion",
+          "slug": "body-lotion"
         },
         {
           "id": 3,
-          "name": "Beets",
-          "slug": "beets"
+          "name": "Body Mist",
+          "slug": "body-mist"
         },
         {
           "id": 4,
-          "name": "Cabbages",
-          "slug": "cabbages"
+          "name": "Body Oil",
+          "slug": "body-oil"
+        },
+        {
+          "id": 5,
+          "name": "Body Yogurt",
+          "slug": "body-yogurt"
+        },
+        {
+          "id": 6,
+          "name": "Body Scrub",
+          "slug": "body-scrub"
+        },
+        {
+          "id": 7,
+          "name": "Body Wash",
+          "slug": "body-wash"
+        },
+        {
+          "id": 8,
+          "name": "Foot Cream",
+          "slug": "foot-cream"
+        },
+        {
+          "id": 9,
+          "name": "Hand Cream",
+          "slug": "hand-cream"
+        },
+        {
+          "id": 10,
+          "name": "Pit Cream",
+          "slug": "pit-cream"
         }
       ]
     },
@@ -42,7 +72,7 @@
         "thumbnail": "/images/category/hair-care.png",
         "original": "/images/category/hair-care.png"
       },
-      "icon": "/images/category/icon/diet-foods.svg",
+      "icon": "/images/category/icons/bodycare.svg",
       "children": [
         {
           "id": 1,
@@ -65,7 +95,7 @@
         "thumbnail": "/images/category/skin-care.png",
         "original": "/images/category/skin-care.png"
       },
-      "icon": "/images/category/icon/diet-nutrition.svg"
+      "icon": "/images/category/icons/bodycare.svg"
     },
     {
       "id": 4,
@@ -76,7 +106,7 @@
         "thumbnail": "/images/category/makeup.png",
         "original": "/images/category/makeup.png"
       },
-      "icon": "/images/category/icon/fast-food.svg",
+      "icon": "/images/category/icons/bodycare.svg",
       "children": [
         {
           "id": 1,
@@ -104,7 +134,7 @@
         "thumbnail": "/images/category/phy.png",
         "original": "/images/category/phy.png"
       },
-      "icon": "/images/category/icon/fruits-items.svg",
+      "icon": "/images/category/icons/bodycare.svg",
       "children": [
         {
           "id": 1,
