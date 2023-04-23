@@ -60,6 +60,21 @@
           "id": 10,
           "name": "Pit Cream",
           "slug": "pit-cream"
+        },
+        {
+          "id": 11,
+          "name": "Scented Candle",
+          "slug": "scented-candle"
+        },
+        {
+          "id": 12,
+          "name": "Shower Gel",
+          "slug": "shower-gel"
+        },
+        {
+          "id": 13,
+          "name": "Soap",
+          "slug": "soap"
         }
       ]
     },
@@ -138,23 +153,38 @@
       "children": [
         {
           "id": 1,
-          "name": "Apples",
-          "slug": "apples"
+          "name": "Beard Creme",
+          "slug": "beard-creme"
         },
         {
           "id": 2,
-          "name": "Melons",
-          "slug": "melons"
+          "name": "Beard Oil",
+          "slug": "beard-oil"
         },
         {
           "id": 3,
-          "name": "Berries",
-          "slug": "berries"
+          "name": "Body Scrub",
+          "slug": "body-scrub"
         },
         {
           "id": 4,
-          "name": "Citrus",
-          "slug": "citrus"
+          "name": "Body Wash",
+          "slug": "body-wash"
+        },
+        {
+          "id": 5,
+          "name": "Combo",
+          "slug": "combo"
+        },
+        {
+          "id": 6,
+          "name": "Conditioner",
+          "slug": "conditioner"
+        },
+        {
+          "id": 7,
+          "name": "EDP",
+          "slug": "edp"
         }
       ]
     }
