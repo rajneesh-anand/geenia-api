@@ -91,13 +91,53 @@
       "children": [
         {
           "id": 1,
-          "name": "Whole Eggs",
-          "slug": "whole-eggs"
+          "name": "Conditioner",
+          "slug": "conditioner"
         },
         {
           "id": 2,
-          "name": "Boiled Potatoes",
-          "slug": "boiled-potatoes"
+          "name": "Shampoo",
+          "slug": "shampoo"
+        },
+        {
+          "id": 3,
+          "name": "Combo",
+          "slug": "combo"
+        },
+        {
+          "id": 4,
+          "name": "Hair Oil",
+          "slug": "hair-oil"
+        },
+        {
+          "id": 5,
+          "name": "Hair Mask",
+          "slug": "hair-mask"
+        },
+        {
+          "id": 6,
+          "name": "Hair Serum",
+          "slug": "hair-serum"
+        },
+        {
+          "id": 7,
+          "name": "Hair Styling",
+          "slug": "hair-styling"
+        },
+        {
+          "id": 8,
+          "name": "Hair Treatment",
+          "slug": "hair-treatment"
+        },
+        {
+          "id": 9,
+          "name": "Scalp Serum",
+          "slug": "scalp-serum"
+        },
+        {
+          "id": 10,
+          "name": "Scalp Scrub",
+          "slug": "scalp-scrub"
         }
       ]
     },
@@ -110,7 +150,89 @@
         "thumbnail": "/images/category/skin-care.png",
         "original": "/images/category/skin-care.png"
       },
-      "icon": "/images/category/icons/bodycare.svg"
+      "icon": "/images/category/icons/bodycare.svg",
+      "children": [
+        {
+          "id": 1,
+          "name": "Makeup Cleanser/Remover",
+          "slug": "makeup-remover"
+        },
+        {
+          "id": 2,
+          "name": "Day Cream",
+          "slug": "day-cream"
+        },
+        {
+          "id": 3,
+          "name": "Combo",
+          "slug": "combo"
+        },
+        {
+          "id": 4,
+          "name": "Eye Cream",
+          "slug": "eye-cream"
+        },
+        {
+          "id": 5,
+          "name": "Face & Body Gel",
+          "slug": "face-body-gel"
+        },
+        {
+          "id": 6,
+          "name": "Face Mask",
+          "slug": "face-mask"
+        },
+        {
+          "id": 7,
+          "name": "Face Mist",
+          "slug": "face-mist"
+        },
+        {
+          "id": 8,
+          "name": "Face Oil",
+          "slug": "face-oil"
+        },
+        {
+          "id": 9,
+          "name": "Face Serum",
+          "slug": "face-serum"
+        },
+        {
+          "id": 10,
+          "name": "Face Wash",
+          "slug": "face-wash"
+        },
+        {
+          "id": 11,
+          "name": "Lip Balm",
+          "slug": "lip-balm"
+        },
+        {
+          "id": 12,
+          "name": "Lip Scrub",
+          "slug": "lip-scrub"
+        },
+        {
+          "id": 13,
+          "name": "Moisturizer",
+          "slug": "moisturizer"
+        },
+        {
+          "id": 14,
+          "name": "Night Cream",
+          "slug": "night-cream"
+        },
+        {
+          "id": 15,
+          "name": "Sunscreen",
+          "slug": "sunscreen"
+        },
+        {
+          "id": 16,
+          "name": "Toner",
+          "slug": "toner"
+        }
+      ]
     },
     {
       "id": 4,
@@ -125,18 +247,73 @@
       "children": [
         {
           "id": 1,
-          "name": "Burger",
-          "slug": "burger"
+          "name": "Brow Definer",
+          "slug": "brow-definer"
         },
         {
           "id": 2,
-          "name": "Beef Sandwich",
-          "slug": "beef-sandwich"
+          "name": "Compact",
+          "slug": "compact"
         },
         {
           "id": 3,
-          "name": "Burrito Supreme",
-          "slug": "burrito-supreme"
+          "name": "Combo",
+          "slug": "combo"
+        },
+        {
+          "id": 4,
+          "name": "Concealer",
+          "slug": "concealer"
+        },
+        {
+          "id": 5,
+          "name": "Eye Liner",
+          "slug": "eye-liner"
+        },
+        {
+          "id": 6,
+          "name": "Foundation",
+          "slug": "foundation"
+        },
+        {
+          "id": 7,
+          "name": "Kajals",
+          "slug": "kajals"
+        },
+        {
+          "id": 8,
+          "name": "Lips & Cheek Tint",
+          "slug": "lips-cheek-tint"
+        },
+        {
+          "id": 9,
+          "name": "Lipstick",
+          "slug": "lipstick"
+        },
+        {
+          "id": 10,
+          "name": "Mascara",
+          "slug": "mascara"
+        },
+        {
+          "id": 11,
+          "name": "Nail Care",
+          "slug": "nail-care"
+        },
+        {
+          "id": 12,
+          "name": "Nail Polish",
+          "slug": "nail-polish"
+        },
+        {
+          "id": 13,
+          "name": "Nail Polish Remover",
+          "slug": "nail-polish-remover"
+        },
+        {
+          "id": 14,
+          "name": "Primer",
+          "slug": "primer"
         }
       ]
     },
@@ -185,6 +362,71 @@
           "id": 7,
           "name": "EDP",
           "slug": "edp"
+        },
+        {
+          "id": 8,
+          "name": "Face Cleaner",
+          "slug": "face-cleaner"
+        },
+        {
+          "id": 9,
+          "name": "Face Mask",
+          "slug": "face-mask"
+        },
+        {
+          "id": 10,
+          "name": "Face Serum",
+          "slug": "face-serum"
+        },
+        {
+          "id": 11,
+          "name": "Face Wash",
+          "slug": "face-wash"
+        },
+        {
+          "id": 12,
+          "name": "Face Gel",
+          "slug": "face-gel"
+        },
+        {
+          "id": 13,
+          "name": "Hair Oil",
+          "slug": "hair-oil"
+        },
+        {
+          "id": 14,
+          "name": "Hair Styling",
+          "slug": "hair-styling"
+        },
+        {
+          "id": 15,
+          "name": "Intimate wash",
+          "slug": "intimate-wash"
+        },
+        {
+          "id": 16,
+          "name": "Lip Balm",
+          "slug": "lip-balm"
+        },
+        {
+          "id": 17,
+          "name": "Moisturizer",
+          "slug": "moisturizer"
+        },
+        {
+          "id": 18,
+          "name": "Shampoo",
+          "slug": "shampoo"
+        },
+        {
+          "id": 19,
+          "name": "Soap",
+          "slug": "soap"
+        },
+        {
+          "id": 20,
+          "name": "Sunscreen",
+          "slug": "sunscreen"
         }
       ]
     }

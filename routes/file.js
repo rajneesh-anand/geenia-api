@@ -60,6 +60,61 @@ async function getProducts(sheetTitle) {
   return products;
 }
 
+async function getLimitedProducts(sheetTitle) {
+  if (
+    !(
+      process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL &&
+      process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY &&
+      process.env.GOOGLE_SPREADSHEET_PRODUCTS
+    )
+  ) {
+    throw new Error("forbidden");
+  }
+
+  const doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_PRODUCTS);
+  await doc.useServiceAccountAuth({
+    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL,
+    private_key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.replace(
+      /\\n/gm,
+      "\n"
+    ),
+  });
+  await doc.loadInfo();
+  const sheet = doc.sheetsByTitle[sheetTitle]; // or use doc.sheetsById[id]
+  const rows = await sheet.getRows({ limit: 10 }); // can pass in { limit, offset }
+
+  const products = rows?.map(
+    ({
+      id,
+      name,
+      slug,
+      image,
+      gallery,
+      description,
+      price,
+      sale_price,
+      unit,
+      quantity_in_stock,
+      tags,
+      category,
+    }) => ({
+      id,
+      name,
+      slug,
+      image,
+      gallery,
+      description,
+      price,
+      sale_price,
+      unit,
+      quantity_in_stock,
+      tags,
+      category,
+    })
+  );
+  return products;
+}
+
 router.get("/categories", (req, res) => {
   res.statusCode = 200;
   res.header("Content-Type", "application/json");
@@ -68,8 +123,8 @@ router.get("/categories", (req, res) => {
 
 router.get("/products/bodycare", async (req, res) => {
   try {
-    const data = await getProducts("body_care");
-    console.log(data);
+    const data = await getProducts("bodycare");
+
     return res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
@@ -79,8 +134,8 @@ router.get("/products/bodycare", async (req, res) => {
 
 router.get("/products/skincare", async (req, res) => {
   try {
-    const data = await getProducts("skin_care");
-    console.log(data);
+    const data = await getProducts("skincare");
+
     return res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
@@ -90,8 +145,8 @@ router.get("/products/skincare", async (req, res) => {
 
 router.get("/products/haircare", async (req, res) => {
   try {
-    const data = await getProducts("hair_care");
-    console.log(data);
+    const data = await getProducts("haircare");
+
     return res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
@@ -102,7 +157,7 @@ router.get("/products/haircare", async (req, res) => {
 router.get("/products/makeup", async (req, res) => {
   try {
     const data = await getProducts("makeup");
-    console.log(data);
+
     return res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
@@ -113,7 +168,7 @@ router.get("/products/makeup", async (req, res) => {
 router.get("/products/phy", async (req, res) => {
   try {
     const data = await getProducts("phy");
-    console.log(data);
+
     return res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
@@ -124,7 +179,7 @@ router.get("/products/phy", async (req, res) => {
 router.get("/product/bodycare/:slug", async (req, res) => {
   const product_slug = req.params.slug;
   try {
-    const data = await getProducts("body_care");
+    const data = await getProducts("bodycare");
     const selectedProduct = data.find((item) => item.slug === product_slug);
 
     res.status(200).json({ product: selectedProduct });
@@ -137,7 +192,7 @@ router.get("/product/bodycare/:slug", async (req, res) => {
 router.get("/product/skincare/:slug", async (req, res) => {
   const product_slug = req.params.slug;
   try {
-    const data = await getProducts("skin_care");
+    const data = await getProducts("skincare");
     const selectedProduct = data.find((item) => item.slug === product_slug);
     res.status(200).json({ product: selectedProduct });
   } catch (e) {
@@ -149,7 +204,7 @@ router.get("/product/skincare/:slug", async (req, res) => {
 router.get("/product/haircare/:slug", async (req, res) => {
   const product_slug = req.params.slug;
   try {
-    const data = await getProducts("hair_care");
+    const data = await getProducts("haircare");
     const selectedProduct = data.find((item) => item.slug === product_slug);
     res.status(200).json({ product: selectedProduct });
   } catch (e) {
@@ -179,6 +234,19 @@ router.get("/product/phy/:slug", async (req, res) => {
   } catch (e) {
     console.log(e.message);
     return res.status(202).json({ product: null });
+  }
+});
+
+router.get("/related-product/:slug", async (req, res) => {
+  const product_slug = req.params.slug;
+
+  try {
+    const data = await getLimitedProducts(product_slug);
+
+    res.status(200).json({ data: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ data: null });
   }
 });
 
