@@ -115,6 +115,36 @@ async function getLimitedProducts(sheetTitle) {
   return products;
 }
 
+async function getProducstSlug() {
+  if (
+    !(
+      process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL &&
+      process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY &&
+      process.env.GOOGLE_SPREADSHEET_PRODUCTS
+    )
+  ) {
+    throw new Error("forbidden");
+  }
+
+  const doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_PRODUCTS);
+  await doc.useServiceAccountAuth({
+    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL,
+    private_key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.replace(
+      /\\n/gm,
+      "\n"
+    ),
+  });
+  await doc.loadInfo();
+  const sheet = doc.sheetsByTitle["all_items"]; // or use doc.sheetsById[id]
+  const rows = await sheet.getRows(); // can pass in { limit, offset }
+
+  const products = rows?.map(({ slug, item_category }) => ({
+    slug,
+    item_category,
+  }));
+  return products;
+}
+
 router.get("/categories", (req, res) => {
   res.statusCode = 200;
   res.header("Content-Type", "application/json");
@@ -243,6 +273,16 @@ router.get("/related-product/:slug", async (req, res) => {
   try {
     const data = await getLimitedProducts(product_slug);
 
+    res.status(200).json({ data: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ data: null });
+  }
+});
+
+router.get("/getslug-links", async (req, res) => {
+  try {
+    const data = await getProducstSlug();
     res.status(200).json({ data: data });
   } catch (e) {
     console.log(e.message);
