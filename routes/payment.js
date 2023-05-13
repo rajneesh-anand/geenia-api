@@ -45,17 +45,8 @@ async function getProducts(sheetTitle) {
 }
 
 router.post("/razorpay/create", async (req, res) => {
-  const {
-    item,
-    shipping,
-    mobile,
-    email,
-    name,
-    address,
-    pincode,
-    discount,
-    description,
-  } = req.body;
+  const { item, mobile, email, name, address, pincode, discount, description } =
+    req.body;
 
   // const data = readFileSync(
   //   path.join(__dirname, "../upload/products.json"),
@@ -77,7 +68,8 @@ router.post("/razorpay/create", async (req, res) => {
     return Number(acc) + Number(amtSum);
   }, 0);
 
-  const netAmount = Math.round(Number(total) + Number(shipping)).toFixed(2);
+  const shipping = Number(total) > 500 ? 99.0 : 0;
+  const netAmount = Math.round(Number(total) + shipping).toFixed(2);
 
   const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY,
@@ -113,7 +105,7 @@ router.post("/razorpay/create", async (req, res) => {
         description: description,
         amount: JSON.stringify(total),
         discount: discount == 0 ? "0" : discount,
-        shipping: shipping == 0 ? "free" : shipping,
+        shipping: shipping > 0 ? JSON.stringify(shipping) : "free",
         totalAmount: netAmount,
         orderItem: JSON.stringify(item),
         orderStatus: "Pending",

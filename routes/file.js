@@ -42,6 +42,7 @@ async function getProducts(sheetTitle) {
       quantity_in_stock,
       tags,
       category,
+      product_detailed_description,
     }) => ({
       id,
       name,
@@ -55,6 +56,7 @@ async function getProducts(sheetTitle) {
       quantity_in_stock,
       tags,
       category,
+      product_detailed_description,
     })
   );
   return products;
@@ -195,6 +197,17 @@ router.get("/products/makeup", async (req, res) => {
   }
 });
 
+router.get("/products/fragrance", async (req, res) => {
+  try {
+    const data = await getProducts("fragrance");
+
+    return res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ products: null });
+  }
+});
+
 router.get("/products/phy", async (req, res) => {
   try {
     const data = await getProducts("phy");
@@ -247,6 +260,18 @@ router.get("/product/makeup/:slug", async (req, res) => {
   const product_slug = req.params.slug;
   try {
     const data = await getProducts("makeup");
+    const selectedProduct = data.find((item) => item.slug === product_slug);
+    res.status(200).json({ product: selectedProduct });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ product: null });
+  }
+});
+
+router.get("/product/fragrance/:slug", async (req, res) => {
+  const product_slug = req.params.slug;
+  try {
+    const data = await getProducts("fragrance");
     const selectedProduct = data.find((item) => item.slug === product_slug);
     res.status(200).json({ product: selectedProduct });
   } catch (e) {
