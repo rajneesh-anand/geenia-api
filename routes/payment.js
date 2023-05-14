@@ -18,7 +18,7 @@ router.post("/razorpay/create", async (req, res) => {
     discount,
     description,
   } = req.body;
-
+  console.log(req.body);
   const data = readFileSync(
     path.join(__dirname, "../upload/products.json"),
     "utf-8"
@@ -72,8 +72,8 @@ router.post("/razorpay/create", async (req, res) => {
         pincode: pincode,
         description: description,
         amount: total,
-        discount: discount == 0 ? "0" : discount,
-        shipping: shipping == 0 ? "free" : shipping,
+        discount: discount === "0" ? "0" : discount,
+        shipping: shipping === "0" ? "free" : shipping,
         totalAmount: netAmount,
         orderItem: JSON.stringify(item),
         orderStatus: "Pending",
