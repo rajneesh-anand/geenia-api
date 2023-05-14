@@ -68,7 +68,7 @@ router.post("/forgot-password", async (req, res) => {
 
   let user = await prisma.user.findFirst({
     where: {
-      AND: [{ email: email }, { userStatus: "Active" }],
+      email: email,
     },
   });
 
