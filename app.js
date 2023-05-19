@@ -14,13 +14,11 @@ const payment = require("./routes/payment");
 
 require("dotenv").config();
 
-
 // app.use(
 //   cors({
 //     origin: "*",
 //   })
 // );
-
 
 if (cluster.isMaster) {
   // Fork workers.
@@ -39,25 +37,25 @@ if (cluster.isMaster) {
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
 
+  let allowedDomains = [
+    "https://geenia.vercel.app",
+    "https://geenia-admin.vercel.app",
+    "https://geenia.in",
+    "http://localhost:3000",
+  ];
 
-let allowedDomains = [
-  "https://geenia.vercel.app",
-  "https://geenia.in",
-  "http://localhost:3000",
-];
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedDomains.indexOf(origin) === -1) {
-        var msg = `This site ${origin} does not have an access. Only specific domains are allowed to access it.`;
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
-  })
-);
+  app.use(
+    cors({
+      origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedDomains.indexOf(origin) === -1) {
+          var msg = `This site ${origin} does not have an access. Only specific domains are allowed to access it.`;
+          return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+      },
+    })
+  );
 
   app.use((req, res, next) => {
     console.log(req.path, req.method);

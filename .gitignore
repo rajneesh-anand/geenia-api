@@ -4,3 +4,4 @@ node_modules
 dist
 app.yaml
 .gcloudignore
+test.js

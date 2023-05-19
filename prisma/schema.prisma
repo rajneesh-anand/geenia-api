@@ -17,6 +17,8 @@ model Order {
   email         String
   name          String
   address       String?
+  city          String?
+  state         String?
   pincode       String?
   description   String?
   mobile        String?
@@ -28,6 +30,12 @@ model Order {
   orderStatus   String?
   paymentId     String?
   paymentStatus String?
+}
+
+model ShiprocketToken {
+  id            Int     @default(autoincrement()) @id
+  tokenDate     DateTime  @default(now())  
+  token         String
 }
 
 

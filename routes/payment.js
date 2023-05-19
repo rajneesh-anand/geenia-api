@@ -6,6 +6,65 @@ const { readFileSync } = require("fs");
 const prisma = require("../lib/prisma");
 const path = require("path");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
+const { default: axios } = require("axios");
+const dayjs = require("dayjs");
+
+function sortArrayOfObjects(items) {
+  const result = items.reduce((acc, item) => {
+    let itm = {
+      name: item.name,
+      sku: "sku-1",
+      units: item.quantity,
+      selling_price: item.itemTotal,
+      discount: "",
+      tax: "",
+      hsn: 441122,
+    };
+    acc.push(itm);
+    return acc;
+  }, []);
+
+  return result;
+}
+
+async function CreateShipRocketOrder(orderNumber) {
+  const result = await prisma.order.findUnique({
+    where: {
+      orderNumber: orderNumber,
+    },
+  });
+  const { data } = await axios.post(
+    "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
+    {
+      order_id: result.orderNumber,
+      order_date: dayjs(result.orderDate).format("YYYY-MM-DD"),
+      pickup_location: "Delhi",
+      billing_customer_name: result.name,
+      billing_address: result.address,
+      billing_city: result.city,
+      billing_pincode: result.pincode,
+      billing_state: result.state,
+      billing_country: "India",
+      billing_email: result.email,
+      billing_phone: result.mobile,
+      shipping_is_billing: true,
+      order_items: sortArrayOfObjects(JSON.parse(result.orderItem)),
+      payment_method: "Prepaid",
+      shipping_charges: Number(result.shipping),
+      length: 10,
+      breadth: 15,
+      height: 20,
+      weight: 2.5,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.SHIPROCKET_TOKEN}`,
+      },
+    }
+  );
+  console.log(data);
+}
 
 async function getProducts(sheetTitle) {
   if (
@@ -45,8 +104,18 @@ async function getProducts(sheetTitle) {
 }
 
 router.post("/razorpay/create", async (req, res) => {
-  const { item, mobile, email, name, address, pincode, discount, description } =
-    req.body;
+  const {
+    item,
+    mobile,
+    email,
+    name,
+    address,
+    pincode,
+    discount,
+    description,
+    city,
+    state,
+  } = req.body;
 
   // const data = readFileSync(
   //   path.join(__dirname, "../upload/products.json"),
@@ -68,7 +137,7 @@ router.post("/razorpay/create", async (req, res) => {
     return Number(acc) + Number(amtSum);
   }, 0);
 
-  const shipping = Number(total) > 500 ? 99.0 : 0;
+  const shipping = Number(total) > 500 ? 0 : 99;
   const netAmount = Math.round(Number(total) + shipping).toFixed(2);
 
   const razorpay = new Razorpay({
@@ -100,12 +169,14 @@ router.post("/razorpay/create", async (req, res) => {
         email: email,
         name: name,
         address: address,
+        city: city,
+        state: state,
         mobile: mobile,
         pincode: pincode,
         description: description,
         amount: JSON.stringify(total),
         discount: discount == 0 ? "0" : discount,
-        shipping: shipping > 0 ? JSON.stringify(shipping) : "free",
+        shipping: shipping > 0 ? JSON.stringify(shipping) : "0",
         totalAmount: netAmount,
         orderItem: JSON.stringify(item),
         orderStatus: "Pending",
@@ -129,7 +200,9 @@ router.post("/razorpay/create", async (req, res) => {
 });
 
 router.post("/razorpay/verify", async (req, res) => {
-  let body = req.body.orderId + "|" + req.body.paymentId;
+  const { orderId, paymentId, signature, orderNumber } = req.body;
+
+  let body = orderId + "|" + paymentId;
 
   let expectedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_SECRET)
@@ -137,10 +210,11 @@ router.post("/razorpay/verify", async (req, res) => {
     .digest("hex");
 
   try {
-    if (expectedSignature === req.body.signature) {
+    if (expectedSignature === signature) {
+      await CreateShipRocketOrder(orderNumber);
       await prisma.order.update({
         where: {
-          orderNumber: req.body.orderNumber,
+          orderNumber: orderNumber,
         },
         data: {
           orderStatus: "Created",

@@ -167,7 +167,6 @@ router.get("/products/bodycare", async (req, res) => {
 router.get("/products/skincare", async (req, res) => {
   try {
     const data = await getProducts("skincare");
-
     return res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
