@@ -117,12 +117,6 @@ router.post("/razorpay/create", async (req, res) => {
     state,
   } = req.body;
 
-  // const data = readFileSync(
-  //   path.join(__dirname, "../upload/products.json"),
-  //   "utf-8"
-  // );
-  // const products = JSON.parse(data);
-
   const products = await getProducts("all_items");
 
   const total = item.reduce((acc, itm) => {

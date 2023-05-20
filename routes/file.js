@@ -314,4 +314,8 @@ router.get("/getslug-links", async (req, res) => {
   }
 });
 
+router.get("/test", (req, res) => {
+  return res.status(200).json({ message: "Hello World" });
+});
+
 module.exports = router;

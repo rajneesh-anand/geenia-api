@@ -161,55 +161,55 @@ router.get("/reset-password/:access", async (req, res) => {
   }
 });
 
-router.get("/create/shiprocket-token", async (req, res) => {
-  const { data } = await axios.post(
-    "https://apiv2.shiprocket.in/v1/external/auth/login",
-    {
-      email: process.env.SHIPROCKET_EMAIL,
-      password: process.env.SHIPROCKET_PASSWORD,
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+// router.get("/create/shiprocket-token", async (req, res) => {
+//   const { data } = await axios.post(
+//     "https://apiv2.shiprocket.in/v1/external/auth/login",
+//     {
+//       email: process.env.SHIPROCKET_EMAIL,
+//       password: process.env.SHIPROCKET_PASSWORD,
+//     },
+//     {
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//     }
+//   );
 
-  try {
-    await prisma.shiprocketToken.deleteMany();
-    await prisma.shiprocketToken.create({
-      data: {
-        token: data.token,
-      },
-    });
-    return res.status(200).json({ message: "token generated !" });
-  } catch (error) {
-    console.log(error);
-    return res.status(403).json({ message: "Token generation failed " });
-  } finally {
-    async () => {
-      await prisma.$disconnect();
-    };
-  }
-});
+//   try {
+//     await prisma.shiprocketToken.deleteMany();
+//     await prisma.shiprocketToken.create({
+//       data: {
+//         token: data.token,
+//       },
+//     });
+//     return res.status(200).json({ message: "token generated !" });
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(403).json({ message: "Token generation failed " });
+//   } finally {
+//     async () => {
+//       await prisma.$disconnect();
+//     };
+//   }
+// });
 
-router.get("/find/shiprocket-token", async (req, res) => {
-  try {
-    const result = await prisma.shiprocketToken.findFirst({
-      select: {
-        token: true,
-      },
-    });
+// router.get("/find/shiprocket-token", async (req, res) => {
+//   try {
+//     const result = await prisma.shiprocketToken.findFirst({
+//       select: {
+//         token: true,
+//       },
+//     });
 
-    return res.status(200).json({ token: result.token });
-  } catch (error) {
-    console.log(error);
-    return res.status(403).json({ message: "Token not available ! " });
-  } finally {
-    async () => {
-      await prisma.$disconnect();
-    };
-  }
-});
+//     return res.status(200).json({ token: result.token });
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(403).json({ message: "Token not available ! " });
+//   } finally {
+//     async () => {
+//       await prisma.$disconnect();
+//     };
+//   }
+// });
 
 module.exports = router;
