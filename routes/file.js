@@ -98,7 +98,7 @@ async function getLimitedProducts(sheetTitle) {
       unit,
       quantity_in_stock,
       tags,
-      category,
+      item_category,
     }) => ({
       id,
       name,
@@ -111,7 +111,7 @@ async function getLimitedProducts(sheetTitle) {
       unit,
       quantity_in_stock,
       tags,
-      category,
+      item_category,
     })
   );
   return products;
