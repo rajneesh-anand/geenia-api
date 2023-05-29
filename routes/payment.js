@@ -205,7 +205,7 @@ router.post("/razorpay/verify", async (req, res) => {
 
   try {
     if (expectedSignature === signature) {
-      await CreateShipRocketOrder(orderNumber);
+      // await CreateShipRocketOrder(orderNumber);
       await prisma.order.update({
         where: {
           orderNumber: orderNumber,
