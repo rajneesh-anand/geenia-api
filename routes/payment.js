@@ -117,11 +117,14 @@ router.post("/razorpay/create", async (req, res) => {
     state,
   } = req.body;
 
+  // console.log(req.body);
+
   const products = await getProducts("all_items");
+  // console.log(products);
 
   const total = item.reduce((acc, itm) => {
     const selectedProduct = products.find((product) => {
-      return product.id === itm.id && product.slug === itm.slug;
+      return product.slug === itm.slug;
     });
 
     const amtSum = Math.round(
