@@ -78,10 +78,11 @@ async function getProducts(sheetTitle) {
   }
 
   const doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_PRODUCTS);
+
   await doc.useServiceAccountAuth({
     client_email: process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL,
     private_key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.replace(
-      /\\n/gm,
+      /\\n/g,
       "\n"
     ),
   });
@@ -89,17 +90,13 @@ async function getProducts(sheetTitle) {
   const sheet = doc.sheetsByTitle[sheetTitle]; // or use doc.sheetsById[id]
   const rows = await sheet.getRows(); // can pass in { limit, offset }
 
-  const products = rows?.map(
-    ({ id, name, slug, price, sale_price, unit, quantity_in_stock }) => ({
-      id,
-      name,
-      slug,
-      price,
-      sale_price,
-      unit,
-      quantity_in_stock,
-    })
-  );
+  const products = rows?.map(({ id, name, slug, price, sale_price }) => ({
+    id,
+    name,
+    slug,
+    price,
+    sale_price,
+  }));
   return products;
 }
 
