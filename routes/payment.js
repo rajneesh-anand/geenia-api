@@ -63,7 +63,7 @@ async function CreateShipRocketOrder(orderNumber) {
       },
     }
   );
-  console.log(data);
+  // console.log(data);
 }
 
 async function getProducts(sheetTitle) {
@@ -119,6 +119,7 @@ router.post("/razorpay/create", async (req, res) => {
 
   // console.log(req.body);
 
+  // console.log(item);
   const products = await getProducts("all_items");
   // console.log(products);
 
