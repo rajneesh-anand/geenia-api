@@ -22,6 +22,7 @@ let allowedDomains = [
   "https://geenia.vercel.app",
   "https://geenia-admin.vercel.app",
   "https://geenia.in",
+  "https://www.geenia.in",
   "http://localhost:3000",
 ];
 

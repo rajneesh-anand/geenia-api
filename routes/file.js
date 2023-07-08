@@ -153,6 +153,17 @@ router.get("/categories", (req, res) => {
   res.sendFile(path.join(__dirname, "../upload/categories.json"));
 });
 
+router.get("/products/all", async (req, res) => {
+  try {
+    const data = await getProducts("all_items");
+
+    return res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ products: null });
+  }
+});
+
 router.get("/products/bodycare", async (req, res) => {
   try {
     const data = await getProducts("bodycare");
