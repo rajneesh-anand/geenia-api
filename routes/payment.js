@@ -9,62 +9,62 @@ const { GoogleSpreadsheet } = require("google-spreadsheet");
 const { default: axios } = require("axios");
 const dayjs = require("dayjs");
 
-function sortArrayOfObjects(items) {
-  const result = items.reduce((acc, item) => {
-    let itm = {
-      name: item.name,
-      sku: "sku-1",
-      units: item.quantity,
-      selling_price: item.itemTotal,
-      discount: "",
-      tax: "",
-      hsn: 441122,
-    };
-    acc.push(itm);
-    return acc;
-  }, []);
+// function sortArrayOfObjects(items) {
+//   const result = items.reduce((acc, item) => {
+//     let itm = {
+//       name: item.name,
+//       sku: "sku-1",
+//       units: item.quantity,
+//       selling_price: item.itemTotal,
+//       discount: "",
+//       tax: "",
+//       hsn: 441122,
+//     };
+//     acc.push(itm);
+//     return acc;
+//   }, []);
 
-  return result;
-}
+//   return result;
+// }
 
-async function CreateShipRocketOrder(orderNumber) {
-  const result = await prisma.order.findUnique({
-    where: {
-      orderNumber: orderNumber,
-    },
-  });
-  const { data } = await axios.post(
-    "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
-    {
-      order_id: result.orderNumber,
-      order_date: dayjs(result.orderDate).format("YYYY-MM-DD"),
-      pickup_location: "Delhi",
-      billing_customer_name: result.name,
-      billing_address: result.address,
-      billing_city: result.city,
-      billing_pincode: result.pincode,
-      billing_state: result.state,
-      billing_country: "India",
-      billing_email: result.email,
-      billing_phone: result.mobile,
-      shipping_is_billing: true,
-      order_items: sortArrayOfObjects(JSON.parse(result.orderItem)),
-      payment_method: "Prepaid",
-      shipping_charges: Number(result.shipping),
-      length: 10,
-      breadth: 15,
-      height: 20,
-      weight: 2.5,
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.SHIPROCKET_TOKEN}`,
-      },
-    }
-  );
-  // console.log(data);
-}
+// async function CreateShipRocketOrder(orderNumber) {
+//   const result = await prisma.order.findUnique({
+//     where: {
+//       orderNumber: orderNumber,
+//     },
+//   });
+//   const { data } = await axios.post(
+//     "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
+//     {
+//       order_id: result.orderNumber,
+//       order_date: dayjs(result.orderDate).format("YYYY-MM-DD"),
+//       pickup_location: "Delhi",
+//       billing_customer_name: result.name,
+//       billing_address: result.address,
+//       billing_city: result.city,
+//       billing_pincode: result.pincode,
+//       billing_state: result.state,
+//       billing_country: "India",
+//       billing_email: result.email,
+//       billing_phone: result.mobile,
+//       shipping_is_billing: true,
+//       order_items: sortArrayOfObjects(JSON.parse(result.orderItem)),
+//       payment_method: "Prepaid",
+//       shipping_charges: Number(result.shipping),
+//       length: 10,
+//       breadth: 15,
+//       height: 20,
+//       weight: 2.5,
+//     },
+//     {
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${process.env.SHIPROCKET_TOKEN}`,
+//       },
+//     }
+//   );
+//   // console.log(data);
+// }
 
 async function getProducts(sheetTitle) {
   if (
@@ -78,17 +78,16 @@ async function getProducts(sheetTitle) {
   }
 
   const doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_PRODUCTS);
-
   await doc.useServiceAccountAuth({
     client_email: process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL,
     private_key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.replace(
-      /\\n/g,
+      /\\n/gm,
       "\n"
     ),
   });
   await doc.loadInfo();
-  const sheet = doc.sheetsByTitle[sheetTitle]; // or use doc.sheetsById[id]
-  const rows = await sheet.getRows(); // can pass in { limit, offset }
+  const sheet = doc.sheetsByTitle[sheetTitle];
+  const rows = await sheet.getRows();
 
   const products = rows?.map(({ id, name, slug, price, sale_price }) => ({
     id,
