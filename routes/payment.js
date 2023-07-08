@@ -184,7 +184,7 @@ router.post("/razorpay/create", async (req, res) => {
       orderNumber: order_number,
     });
   } catch (error) {
-    console.error(error);
+    console.log(error.message);
     return res.status(500).send(error);
   } finally {
     async () => {
@@ -224,7 +224,7 @@ router.post("/razorpay/verify", async (req, res) => {
       throw new Error("failed");
     }
   } catch (error) {
-    console.error(error);
+    console.log(error.message);
     res.status(500).send(error.message);
   } finally {
     async () => {
