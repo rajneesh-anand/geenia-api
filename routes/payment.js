@@ -120,47 +120,47 @@ router.post("/razorpay/create", async (req, res) => {
   // console.log(req.body);
 
   // console.log(item);
-  const products = await getProducts("all_items");
-  // console.log(products);
+  try {
+    const products = await getProducts("all_items");
+    // console.log(products);
 
-  const total = item.reduce((acc, itm) => {
-    const selectedProduct = products.find((product) => {
-      return product.slug === itm.slug;
+    const total = item.reduce((acc, itm) => {
+      const selectedProduct = products.find((product) => {
+        return product.slug === itm.slug;
+      });
+
+      const amtSum = Math.round(
+        Number(selectedProduct.sale_price) * Number(itm.quantity)
+      ).toFixed(2);
+
+      return Number(acc) + Number(amtSum);
+    }, 0);
+
+    const shipping = Number(total) > 500 ? 0 : 99;
+    const netAmount = Math.round(Number(total) + shipping).toFixed(2);
+
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY,
+      key_secret: process.env.RAZORPAY_SECRET,
     });
 
-    const amtSum = Math.round(
-      Number(selectedProduct.sale_price) * Number(itm.quantity)
-    ).toFixed(2);
+    let orderDate = new Date();
 
-    return Number(acc) + Number(amtSum);
-  }, 0);
+    let order_number = `GNID${Math.floor(
+      Math.random(4) * 100000
+    )}-${orderDate.getFullYear()}${
+      orderDate.getMonth() + 1
+    }${orderDate.getDate()}`;
 
-  const shipping = Number(total) > 500 ? 0 : 99;
-  const netAmount = Math.round(Number(total) + shipping).toFixed(2);
+    const payment_capture = 1;
+    const currency = "INR";
+    const options = {
+      amount: (netAmount * 100).toString(),
+      currency,
+      receipt: order_number,
+      payment_capture,
+    };
 
-  const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY,
-    key_secret: process.env.RAZORPAY_SECRET,
-  });
-
-  let orderDate = new Date();
-
-  let order_number = `GNID${Math.floor(
-    Math.random(4) * 100000
-  )}-${orderDate.getFullYear()}${
-    orderDate.getMonth() + 1
-  }${orderDate.getDate()}`;
-
-  const payment_capture = 1;
-  const currency = "INR";
-  const options = {
-    amount: (netAmount * 100).toString(),
-    currency,
-    receipt: order_number,
-    payment_capture,
-  };
-
-  try {
     await prisma.order.create({
       data: {
         orderNumber: order_number,
@@ -189,7 +189,7 @@ router.post("/razorpay/create", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send(error);
+    return res.status(500).send(error);
   } finally {
     async () => {
       await prisma.$disconnect();
