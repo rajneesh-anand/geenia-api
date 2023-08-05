@@ -12,7 +12,7 @@ const payment = require("./routes/payment");
 require("dotenv").config();
 
 const app = express();
-const port = process.env.PORT || 8080;
+// const port = process.env.PORT || 8080;
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -20,10 +20,11 @@ app.use(cookieParser());
 
 let allowedDomains = [
   "https://geenia.vercel.app",
-  "https://geenia-admin.vercel.app",
+  "http://localhost:3000",
+  "http://154.41.253.184:8800",
+  "http://154.41.253.184",
   "https://geenia.in",
   "https://www.geenia.in",
-  "http://localhost:3000",
 ];
 
 app.use(
@@ -49,6 +50,6 @@ app.use("/api/order", order);
 app.use("/api/payment", payment);
 app.use("/api", file);
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(8800, () => {
+  console.log(`Server is running on port 8800`);
 });
