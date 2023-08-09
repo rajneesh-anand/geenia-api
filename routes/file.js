@@ -5,7 +5,8 @@ const { GoogleSpreadsheet } = require("google-spreadsheet");
 
 const router = express.Router();
 
-const APP_URL = "http://localhost:8800/api";
+// const APP_URL = "http://localhost:8800/api";
+const APP_URL = "http://154.41.253.184:8800/api";
 
 function paginate(totalItems, currentPage, pageSize, count, url) {
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -79,6 +80,7 @@ async function getProductsSheetWise(sheetTitle) {
       quantity_in_stock,
       tags,
       category,
+      sub_category,
       product_detailed_description,
       new_arrival,
     }) => ({
@@ -94,6 +96,7 @@ async function getProductsSheetWise(sheetTitle) {
       quantity_in_stock,
       tags,
       category,
+      sub_category,
       product_detailed_description,
       new_arrival,
     })
@@ -140,6 +143,7 @@ async function getProducts(sheetTitle, skip, take) {
       quantity_in_stock,
       tags,
       category,
+      sub_category,
       product_detailed_description,
       new_arrival,
     }) => ({
@@ -155,6 +159,7 @@ async function getProducts(sheetTitle, skip, take) {
       quantity_in_stock,
       tags,
       category,
+      sub_category,
       product_detailed_description,
       new_arrival,
     })
@@ -184,11 +189,7 @@ async function getProductsCategoryWise(sheetTitle, subcategory, page, limit) {
   });
   await doc.loadInfo();
   const sheet = doc.sheetsByTitle[sheetTitle]; // or use doc.sheetsById[id]
-  const rows = await sheet.getRows({
-    offset: page == 1 ? 1 : (Number(page) - 1) * limit,
-    limit: 12,
-  }); // can pass in { limit, offset }
-  const totalRecords = sheet.rowCount;
+  const rows = await sheet.getRows(); // can pass in { limit, offset }
 
   const products = rows?.map(
     ({
@@ -204,6 +205,7 @@ async function getProductsCategoryWise(sheetTitle, subcategory, page, limit) {
       quantity_in_stock,
       tags,
       category,
+      sub_category,
       product_detailed_description,
       new_arrival,
     }) => ({
@@ -219,13 +221,14 @@ async function getProductsCategoryWise(sheetTitle, subcategory, page, limit) {
       quantity_in_stock,
       tags,
       category,
+      sub_category,
       product_detailed_description,
       new_arrival,
     })
   );
 
   const productListCategoryWise = products.reduce((acc, item) => {
-    let subCategoryExist = JSON.parse(item.category).find(
+    let subCategoryExist = JSON.parse(item.sub_category).find(
       (cat) => subcategory == cat
     );
 
@@ -235,7 +238,7 @@ async function getProductsCategoryWise(sheetTitle, subcategory, page, limit) {
     return acc;
   }, []);
 
-  // console.log(productListCategoryWise);
+  console.log(productListCategoryWise);
 
   return productListCategoryWise;
 }
@@ -276,7 +279,8 @@ async function getLimitedProducts(sheetTitle) {
       unit,
       quantity_in_stock,
       tags,
-      item_category,
+      category,
+      sub_category,
     }) => ({
       id,
       name,
@@ -289,7 +293,8 @@ async function getLimitedProducts(sheetTitle) {
       unit,
       quantity_in_stock,
       tags,
-      item_category,
+      category,
+      sub_category,
     })
   );
   return products;
@@ -320,16 +325,10 @@ async function getProducstSlug() {
 
   const products = rows?.map(({ slug, item_category }) => ({
     slug,
-    item_category,
+    category,
   }));
   return products;
 }
-
-router.get("/categories", (req, res) => {
-  res.statusCode = 200;
-  res.header("Content-Type", "application/json");
-  res.sendFile(path.join(__dirname, "../upload/categories.json"));
-});
 
 router.get("/products/all", async (req, res) => {
   try {
@@ -608,6 +607,7 @@ router.get("/getslug-links", async (req, res) => {
 
 router.get("/skincare", async (req, res) => {
   const { category, page, limit } = req.query;
+  console.log(category);
   try {
     const data = await getProductsCategoryWise(
       "skincare",
@@ -615,7 +615,87 @@ router.get("/skincare", async (req, res) => {
       page,
       limit
     );
-    // const selectedProduct = data.find((item) => item.slug === product_slug);
+
+    res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ product: null });
+  }
+});
+
+router.get("/bodycare", async (req, res) => {
+  const { category, page, limit } = req.query;
+  console.log(category);
+  try {
+    const data = await getProductsCategoryWise(
+      "bodycare",
+      category,
+      page,
+      limit
+    );
+
+    res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ product: null });
+  }
+});
+
+router.get("/haircare", async (req, res) => {
+  const { category, page, limit } = req.query;
+  console.log(category);
+  try {
+    const data = await getProductsCategoryWise(
+      "haircare",
+      category,
+      page,
+      limit
+    );
+
+    res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ product: null });
+  }
+});
+
+router.get("/makeup", async (req, res) => {
+  const { category, page, limit } = req.query;
+  console.log(category);
+  try {
+    const data = await getProductsCategoryWise("makeup", category, page, limit);
+
+    res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ product: null });
+  }
+});
+
+router.get("/phy", async (req, res) => {
+  const { category, page, limit } = req.query;
+  console.log(category);
+  try {
+    const data = await getProductsCategoryWise("phy", category, page, limit);
+
+    res.status(200).json({ products: data });
+  } catch (e) {
+    console.log(e.message);
+    return res.status(202).json({ product: null });
+  }
+});
+
+router.get("/fragrance", async (req, res) => {
+  const { category, page, limit } = req.query;
+  console.log(category);
+  try {
+    const data = await getProductsCategoryWise(
+      "fragrance",
+      category,
+      page,
+      limit
+    );
+
     res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
@@ -625,13 +705,11 @@ router.get("/skincare", async (req, res) => {
 
 router.get("/search", async (req, res) => {
   const { product } = req.query;
-  console.log(product);
-
+  // console.log(product);
   try {
     const data = await getProductsSheetWise("all_items");
 
     const searchedData = data.reduce((acc, item) => {
-      console.log(item.name);
       let productName = item.name;
       let position = productName.search(`${product}`);
 
