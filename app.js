@@ -24,6 +24,7 @@ let allowedDomains = [
   "http://154.41.253.184:3000",
   "https://geenia.in",
   "https://www.geenia.in",
+  "https://admin.geenia.in",
 ];
 
 app.use(
