@@ -5,8 +5,8 @@ const { GoogleSpreadsheet } = require("google-spreadsheet");
 
 const router = express.Router();
 
-const APP_URL = "http://localhost:8800/api";
-//const APP_URL = "http://154.41.253.184:8800/api";
+// const APP_URL = "http://localhost:8800/api";
+const APP_URL = "https://api.geenia.in/api";
 
 function paginate(totalItems, currentPage, pageSize, count, url) {
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -237,8 +237,6 @@ async function getProductsCategoryWise(sheetTitle, subcategory, page, limit) {
     }
     return acc;
   }, []);
-
-  console.log(productListCategoryWise);
 
   return productListCategoryWise;
 }
@@ -661,7 +659,7 @@ router.get("/haircare", async (req, res) => {
 
 router.get("/makeup", async (req, res) => {
   const { category, page, limit } = req.query;
-  console.log(category);
+
   try {
     const data = await getProductsCategoryWise("makeup", category, page, limit);
 
@@ -674,7 +672,7 @@ router.get("/makeup", async (req, res) => {
 
 router.get("/phy", async (req, res) => {
   const { category, page, limit } = req.query;
-  console.log(category);
+
   try {
     const data = await getProductsCategoryWise("phy", category, page, limit);
 

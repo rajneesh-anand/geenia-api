@@ -12,7 +12,6 @@ datasource db {
 
 model Order {
   id            Int     @default(autoincrement()) @id
-  orderDate     DateTime  @default(now())  
   orderNumber   String @unique
   email         String
   name          String
@@ -30,6 +29,8 @@ model Order {
   orderStatus   String?
   paymentId     String?
   paymentStatus String?
+  orderDate     DateTime  @default(now()) 
+  orderDispatchDate String?  
 }
 
 model ShiprocketToken {
@@ -96,8 +97,7 @@ model User {
   image         String?
   userType      String?  
   userStatus    String?
-  createdAt     DateTime  @default(now()) @map(name: "created_at") 
-  
+  createdAt     DateTime  @default(now())   
   accounts      Account[]
   sessions      Session[]
   verificationTokens    VerificationToken[]

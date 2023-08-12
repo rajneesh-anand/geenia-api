@@ -2,11 +2,8 @@ const express = require("express");
 const prisma = require("../lib/prisma");
 
 const router = express.Router();
-
-const APP_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://www.vedusone.com/api"
-    : "http://localhost:8080/api";
+// const APP_URL = "http://localhost:8800/api";
+const APP_URL = "https://api.geenia.in/api";
 
 function paginate(totalItems, currentPage, pageSize, count, url) {
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -65,7 +62,7 @@ router.get("/", async (req, res) => {
         createdAt: sortedBy,
       },
     });
-    // console.log(product.length);
+
     res.status(200).json({
       msg: "success",
       data: users,
@@ -82,16 +79,29 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/list", async (req, res) => {
+  const curPage = req.query.page || 1;
+  const perPage = req.query.limit || 25;
+
+  const url = `/user/list?limit=${perPage}`;
+
+  const skipItems =
+    curPage == 1 ? 0 : (parseInt(perPage) - 1) * parseInt(curPage);
+
+  const totalItems = await prisma.user.count();
+
   try {
-    let result = await prisma.user.findMany({
-      // where: {
-      //   status: "Active",
-      //   userType: "Student",
-      // },
+    let users = await prisma.user.findMany({
+      skip: parseInt(skipItems),
+      take: parseInt(perPage),
+      where: {
+        userStatus: "Active",
+      },
+      orderBy: { createdAt: "desc" },
     });
     return res.status(200).json({
       msg: "success",
-      data: result,
+      data: users,
+      ...paginate(totalItems, curPage, perPage, users.length, url),
     });
   } catch (error) {
     console.log(error);
@@ -132,8 +142,7 @@ router.get("/list/home", async (req, res) => {
 router.post("/status/:id", async (req, res) => {
   const id = req.params.id;
   const status = req.body.userStatus;
-  console.log(id);
-  console.log(status);
+
   try {
     await prisma.user.update({
       where: {
@@ -149,6 +158,31 @@ router.post("/status/:id", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
+  } finally {
+    async () => {
+      await prisma.$disconnect();
+    };
+  }
+});
+
+router.get("/admin", async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        userType: "Administrator",
+      },
+      select: {
+        email: true,
+      },
+    });
+    console.log(users);
+    return res.status(200).json({
+      msg: "success",
+      data: users,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error);
   } finally {
     async () => {
       await prisma.$disconnect();

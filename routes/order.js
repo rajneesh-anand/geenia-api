@@ -2,10 +2,8 @@ const express = require("express");
 const prisma = require("../lib/prisma");
 const router = express.Router();
 
-const APP_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://www.vedusone.com/api"
-    : "http://localhost:8080/api";
+// const APP_URL = "http://localhost:8800/api";
+const APP_URL = "https://api.geenia.in/api";
 
 function paginate(totalItems, currentPage, pageSize, count, url) {
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -41,13 +39,11 @@ function paginate(totalItems, currentPage, pageSize, count, url) {
   };
 }
 
-router.get("/", async (req, res) => {
-  const { orderBy, sortedBy } = req.query;
-
+router.get("/list", async (req, res) => {
   const curPage = req.query.page || 1;
   const perPage = req.query.limit || 25;
 
-  const url = `/order?limit=${perPage}`;
+  const url = `/order/list?limit=${perPage}`;
 
   const skipItems =
     curPage == 1 ? 0 : (parseInt(perPage) - 1) * parseInt(curPage);
@@ -55,15 +51,13 @@ router.get("/", async (req, res) => {
   const totalItems = await prisma.order.count();
 
   try {
-    const orders = await prisma.order.findMany({
-      skip: skipItems,
+    let orders = await prisma.order.findMany({
+      skip: parseInt(skipItems),
       take: parseInt(perPage),
-      orderBy: {
-        orderDate: sortedBy,
-      },
+
+      orderBy: { orderDate: "desc" },
     });
-    // console.log(product.length);
-    res.status(200).json({
+    return res.status(200).json({
       msg: "success",
       data: orders,
       ...paginate(totalItems, curPage, perPage, orders.length, url),
@@ -71,6 +65,27 @@ router.get("/", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
+  } finally {
+    async () => {
+      await prisma.$disconnect();
+    };
+  }
+});
+
+router.get("/single-order/:id", async (req, res) => {
+  const order_number = req.params.id;
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { orderNumber: order_number },
+    });
+
+    return res.status(200).json({
+      data: order,
+    });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(400).json({ message: error.message });
   } finally {
     async () => {
       await prisma.$disconnect();
@@ -111,7 +126,7 @@ router.post("/neworder", async (req, res) => {
   }
 });
 
-router.post("/order-list", async (req, res) => {
+router.post("/customer-orders", async (req, res) => {
   const { email } = req.body;
   try {
     const result = await prisma.order.findMany({
@@ -126,6 +141,30 @@ router.post("/order-list", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send(error);
+  } finally {
+    async () => {
+      await prisma.$disconnect();
+    };
+  }
+});
+
+router.post("/status", async (req, res) => {
+  const { orderNumber, status } = req.body;
+  try {
+    await prisma.order.update({
+      where: {
+        orderNumber: orderNumber,
+      },
+      data: {
+        orderStatus: status,
+      },
+    });
+    return res.status(200).json({
+      msg: "success",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
   } finally {
     async () => {
       await prisma.$disconnect();
