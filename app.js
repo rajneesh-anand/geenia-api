@@ -19,7 +19,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 let allowedDomains = [
-  "https://geenia.vercel.app",
   "http://localhost:3000",
   "http://154.41.253.184:8800",
   "http://154.41.253.184:3000",

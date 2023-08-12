@@ -115,7 +115,7 @@ router.post("/razorpay/create", async (req, res) => {
 
   // console.log(req.body);
 
-  // console.log(item);
+  console.log(item);
   try {
     const products = await getProducts("all_items");
     // console.log(products);
