@@ -20,6 +20,7 @@ app.use(cookieParser());
 
 let allowedDomains = [
   "http://localhost:3000",
+  "http://localhost:4000",
   "http://154.41.253.184:8800",
   "http://154.41.253.184:3000",
   "https://geenia.in",
