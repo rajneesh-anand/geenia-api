@@ -228,6 +228,8 @@ async function getProductsCategoryWise(sheetTitle, subcategory, page, limit) {
   );
 
   const productListCategoryWise = products.reduce((acc, item) => {
+    console.log(`item`);
+    console.log(item);
     let subCategoryExist = JSON.parse(item.sub_category).find(
       (cat) => subcategory == cat
     );
@@ -522,9 +524,11 @@ router.get("/product/bodycare/:slug", async (req, res) => {
 
 router.get("/product/skincare/:slug", async (req, res) => {
   const product_slug = req.params.slug;
+  console.log(product_slug);
   try {
     const data = await getProductsSheetWise("skincare");
     const selectedProduct = data.find((item) => item.slug === product_slug);
+    console.log(selectedProduct);
     res.status(200).json({ product: selectedProduct });
   } catch (e) {
     console.log(e.message);
@@ -613,11 +617,11 @@ router.get("/skincare", async (req, res) => {
       page,
       limit
     );
-
+    // console.log(data);
     res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
-    return res.status(202).json({ product: null });
+    return res.status(202).json({ products: null });
   }
 });
 
@@ -635,7 +639,7 @@ router.get("/bodycare", async (req, res) => {
     res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
-    return res.status(202).json({ product: null });
+    return res.status(202).json({ products: null });
   }
 });
 
@@ -653,7 +657,7 @@ router.get("/haircare", async (req, res) => {
     res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
-    return res.status(202).json({ product: null });
+    return res.status(202).json({ products: null });
   }
 });
 
@@ -666,7 +670,7 @@ router.get("/makeup", async (req, res) => {
     res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
-    return res.status(202).json({ product: null });
+    return res.status(202).json({ products: null });
   }
 });
 
@@ -679,7 +683,7 @@ router.get("/phy", async (req, res) => {
     res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
-    return res.status(202).json({ product: null });
+    return res.status(202).json({ products: null });
   }
 });
 
@@ -697,7 +701,7 @@ router.get("/fragrance", async (req, res) => {
     res.status(200).json({ products: data });
   } catch (e) {
     console.log(e.message);
-    return res.status(202).json({ product: null });
+    return res.status(202).json({ products: null });
   }
 });
 
@@ -709,15 +713,24 @@ router.get("/search", async (req, res) => {
 
     const searchedData = data.reduce((acc, item) => {
       let productName = item.name;
-      let position = productName.search(`${product}`);
+      // let position = productName.search(`${product}`);
 
-      if (position != -1) {
+      // if (position != -1) {
+      //   acc.push(item);
+      // }
+
+      let re = new RegExp(product, "gi");
+      let matchProduct = productName.match(re);
+      // console.log(matchProduct);
+
+      if (matchProduct != null) {
         acc.push(item);
       }
+
       return acc;
     }, []);
 
-    console.log(searchedData);
+    // console.log(searchedData);
 
     return res.status(200).json({ data: searchedData });
   } catch (e) {
