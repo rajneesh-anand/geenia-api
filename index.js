@@ -6,6 +6,7 @@ const product = require("./routes/product");
 const message = require("./routes/message");
 const feedback = require("./routes/feedback");
 const post = require("./routes/post");
+const order = require("./routes/order");
 
 require("dotenv").config();
 const {
@@ -55,6 +56,7 @@ async function initializeExpressServer() {
   });
 
   app.use("/api/user", user);
+  app.use("/api/order", order);
   app.use("/api/product", product);
   app.use("/api/message", message);
   app.use("/api/feedback", feedback);
