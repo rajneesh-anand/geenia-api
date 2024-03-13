@@ -1,76 +1,90 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
+const emailMailer = require("../helper/email");
+const { redisCachingMiddleware } = require("../middleware/redis");
+const { messaging } = require("../lib/firebase");
+const jwt = require("jsonwebtoken");
+const { hash, genSalt } = require("bcrypt");
+
+const { IncomingForm } = require("formidable");
+const fs = require("fs");
+const path = require("path");
+const DatauriParser = require("datauri/parser");
+const cloudinary = require("cloudinary").v2;
 
 const router = express.Router();
-// const APP_URL = "http://localhost:8800/api";
-const APP_URL = "https://api.geenia.in/api";
 
-function paginate(totalItems, currentPage, pageSize, count, url) {
-  const totalPages = Math.ceil(totalItems / pageSize);
+const parser = new DatauriParser();
 
-  // ensure current page isn't out of range
-  if (currentPage < 1) {
-    currentPage = 1;
-  } else if (currentPage > totalPages) {
-    currentPage = totalPages;
-  }
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-  // calculate start and end item indexes
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize - 1, totalItems - 1);
+const cloudinaryUpload = (file) => cloudinary.uploader.upload(file);
 
-  // return object with all pager properties required by the view
-  return {
-    total: totalItems,
-    currentPage: +currentPage,
-    count,
-    lastPage: totalPages,
-    firstItem: startIndex,
-    lastItem: endIndex,
-    perPage: pageSize,
-    first_page_url: `${APP_URL}${url}&page=1`,
-    last_page_url: `${APP_URL}${url}&page=${totalPages}`,
-    next_page_url:
-      totalPages > currentPage
-        ? `${APP_URL}${url}&page=${Number(currentPage) + 1}`
-        : null,
-    prev_page_url:
-      totalPages > currentPage ? `${APP_URL}${url}&page=${currentPage}` : null,
+const generateToken = (_id, name, email) => {
+  const jwtClaims = {
+    id: _id,
+    name: name,
+    email: email,
+    iat: Date.now() / 1000,
+    exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
   };
-}
+  return jwt.sign(jwtClaims, process.env.SECRET, {
+    algorithm: "HS256",
+  });
+};
 
-router.get("/", async (req, res) => {
-  const { orderBy, sortedBy } = req.query;
-  const curPage = req.query.page || 1;
-  const perPage = req.query.limit || 25;
-
-  const url = `/user?limit=${perPage}`;
-
-  const skipItems =
-    curPage == 1 ? 0 : (parseInt(perPage) - 1) * parseInt(curPage);
-
-  const totalItems = await prisma.user.count();
+router.post("/register", async (req, res) => {
+  const { mobile, email, password, name } = req.body;
 
   try {
-    const users = await prisma.user.findMany({
-      skip: skipItems,
-      take: parseInt(perPage),
+    const userExits = await prisma.user.count({
       where: {
-        userType: "Student",
-      },
-      orderBy: {
-        createdAt: sortedBy,
+        mobile: mobile,
       },
     });
 
-    res.status(200).json({
-      msg: "success",
-      data: users,
-      ...paginate(totalItems, curPage, perPage, users.length, url),
-    });
+    if (userExits > 0) {
+      return res.status(403).json({
+        message: "Mobile number is already registered !",
+      });
+    } else {
+      const salt = await genSalt(10);
+      const hashedPassword = await hash(password, salt);
+
+      const result = await prisma.user.create({
+        data: {
+          email: email,
+          name: name,
+          password: hashedPassword,
+          mobile: mobile,
+          image:
+            "https://res.cloudinary.com/dlywo5mxn/image/upload/v1689572976/afed80130a2682f1a428984ed8c84308_wscf7t.jpg",
+          userType: "Customer",
+          userStatus: "Active",
+        },
+      });
+
+      const token = generateToken(result.id, name, email);
+      // console.log(token);
+
+      return res.status(200).json({
+        user: {
+          id: result.id,
+          username: result.name,
+          email: result.email,
+          mobile: result.mobile,
+          image: result.image,
+        },
+        token,
+      });
+    }
   } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
+    console.log(error.message);
+    return res.status(400).json({ message: "Something went wrong !" });
   } finally {
     async () => {
       await prisma.$disconnect();
@@ -78,86 +92,225 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/list", async (req, res) => {
-  const curPage = req.query.page || 1;
-  const perPage = req.query.limit || 25;
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
 
-  const url = `/user/list?limit=${perPage}`;
+  let user = await prisma.user.findFirst({
+    where: {
+      email: email,
+    },
+  });
 
-  const skipItems =
-    curPage == 1 ? 0 : (parseInt(perPage) - 1) * parseInt(curPage);
+  if (!user) {
+    return res
+      .status(422)
+      .json({ message: "Email address is not registered !" });
+  }
 
-  const totalItems = await prisma.user.count();
+  let token = await prisma.verificationToken.findFirst({
+    where: {
+      user: { email: email },
+    },
+  });
+
+  if (token) {
+    await prisma.verificationToken.deleteMany({
+      where: {
+        userId: user.id,
+      },
+    });
+  }
+
+  let resetToken = jwt.sign({ email: email }, process.env.SECRET, {
+    expiresIn: "10m",
+  });
 
   try {
-    let users = await prisma.user.findMany({
-      skip: parseInt(skipItems),
-      take: parseInt(perPage),
-      where: {
-        userStatus: "Active",
+    await prisma.verificationToken.create({
+      data: {
+        token: resetToken,
+        user: { connect: { email: email } },
       },
-      orderBy: { createdAt: "desc" },
     });
-    return res.status(200).json({
-      msg: "success",
-      data: users,
-      ...paginate(totalItems, curPage, perPage, users.length, url),
+
+    const link = `${process.env.WEBSITE_URL}/auth/reset-password?access=${resetToken}`;
+
+    await emailMailer.sendPasswordResetEmail({
+      pwdLink: link,
+      email: email,
     });
+    return res.status(200).json({ message: "success" });
   } catch (error) {
     console.log(error);
-    res.status(500).send(error);
-  } finally {
-    async () => {
-      await prisma.$disconnect();
-    };
+    return res.status(503).json({ message: "Something went wrong !" });
   }
 });
 
-router.get("/list/home", async (req, res) => {
-  try {
-    let result = await prisma.user.findMany({
-      take: 15,
-      where: {
-        status: "Active",
-        userType: "Student",
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-    return res.status(200).json({
-      msg: "success",
-      data: result,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  } finally {
-    async () => {
-      await prisma.$disconnect();
-    };
-  }
-});
+router.post("/reset-password/reset/:access", async (req, res) => {
+  const accessToken = req.params.access;
+  const { password } = req.body;
+  const { email } = jwt.verify(accessToken, process.env.SECRET);
 
-router.post("/status/:id", async (req, res) => {
-  const id = req.params.id;
-  const status = req.body.userStatus;
+  const salt = genSaltSync(10);
+  const hashedPassword = hashSync(password, salt);
 
   try {
     await prisma.user.update({
       where: {
-        id: Number(id),
+        email: email,
       },
       data: {
-        status: status,
+        password: hashedPassword,
       },
     });
+    return res.status(200).json({ message: "success" });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(403)
+      .json({ message: "Your password reset token is expired ! " });
+  } finally {
+    async () => {
+      await prisma.$disconnect();
+    };
+  }
+});
+
+router.get("/reset-password/:access", async (req, res) => {
+  const accessToken = req.params.access;
+
+  try {
+    await jwtVerifyAsync(accessToken, process.env.SECRET);
+    return res.status(200).json({ message: "success" });
+  } catch (error) {
+    return res
+      .status(403)
+      .json({ message: "Your password reset token is expired ! " });
+  }
+});
+
+router.post("/profile/update", async (req, res) => {
+  const data = await new Promise((resolve, reject) => {
+    const form = new IncomingForm();
+    form.parse(req, (err, fields, files) => {
+      if (err) return reject(err);
+      resolve({ fields, files });
+    });
+  });
+
+  // console.log(data);
+  try {
+    if (Object.keys(data.files).length > 0) {
+      const docContent = await fs.promises
+        .readFile(data.files.image.path)
+        .catch((err) => console.error("Failed to read file", err));
+
+      let doc64 = parser.format(
+        path.extname(data.files.image.name).toString(),
+        docContent
+      );
+      const uploadResult = await cloudinaryUpload(doc64.content);
+
+      await prisma.user.update({
+        where: {
+          mobile: data.fields.userMobile,
+        },
+        data: {
+          image: uploadResult.secure_url,
+          name: data.fields.userName,
+        },
+      });
+      return res.status(200).json({
+        image_url: uploadResult.secure_url,
+        name: data.fields.userName,
+      });
+    } else {
+      const imageUrl = await prisma.user.findFirst({
+        where: {
+          mobile: data.fields.userMobile,
+        },
+        select: {
+          image: true,
+        },
+      });
+      // console.log(imageUrl.image);
+      await prisma.user.update({
+        where: {
+          mobile: data.fields.userMobile,
+        },
+        data: {
+          name: data.fields.userName,
+        },
+      });
+      return res
+        .status(200)
+        .json({ image_url: imageUrl.image, name: data.fields.userName });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: "Something went wrong" });
+  } finally {
+    async () => {
+      await prisma.$disconnect();
+    };
+  }
+});
+
+router.get("/list", redisCachingMiddleware(), async (req, res) => {
+  let page = req.query.page || 1;
+  let limit = req.query.limit || 50;
+
+  try {
+    const result = await prisma.user.findMany({
+      skip: page == 1 ? 0 : Number(page) * 50,
+      take: Number(limit),
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
     return res.status(200).json({
-      msg: "success",
+      totalCount: result.length,
+      users: result,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send(error);
+    return res.status(400).json({ error: error.message });
+  } finally {
+    async () => {
+      await prisma.$disconnect();
+    };
+  }
+});
+
+router.post("/message", async (req, res) => {
+  const { title, mobile, description } = req.body;
+
+  try {
+    const userExits = await prisma.user.findUnique({
+      where: {
+        mobile: mobile,
+      },
+    });
+
+    if (userExits != null) {
+      const message = {
+        notification: {
+          title: `${title}`,
+          body: `${description}`,
+        },
+        token: userExits.fcmToken,
+      };
+
+      const response = await messaging.send(message);
+      console.log(response);
+      return res.status(200).json({
+        message: "success",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: error.message });
   } finally {
     async () => {
       await prisma.$disconnect();
@@ -175,7 +328,6 @@ router.get("/admin", async (req, res) => {
         email: true,
       },
     });
-    console.log(users);
     return res.status(200).json({
       msg: "success",
       data: users,

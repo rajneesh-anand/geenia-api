@@ -1,4 +1,4 @@
-const prisma = require("../lib/prisma");
+const jwt = require("jsonwebtoken");
 
 function extractToken(req) {
   if (
@@ -12,7 +12,7 @@ function extractToken(req) {
   return null;
 }
 
-const verifyToken = async (req, res, next) => {
+const verifyAuth = async (req, res, next) => {
   const token = extractToken(req);
   // req.body.token || req.query.token || req.headers["x-access-token"];
   // console.log(token);
@@ -21,19 +21,14 @@ const verifyToken = async (req, res, next) => {
     return res.status(401).json({ error: "Unauthorized access " });
   }
   try {
-    const result = await prisma.session.findMany({
-      where: {
-        sessionToken: token,
-      },
+    const { id } = jwt.verify(token, process.env.SECRET, {
+      algorithms: "HS256",
     });
-    if (token === result[0].sessionToken) {
-      return next();
-    } else {
-      throw new Error();
-    }
+    // console.log(id);
+    next();
   } catch (err) {
     console.log(err);
     return res.status(403).json({ access: "Forbidden" });
   }
 };
-module.exports = verifyToken;
+module.exports = verifyAuth;

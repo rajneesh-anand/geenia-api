@@ -1,6 +1,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -10,35 +11,29 @@ datasource db {
 
 
 
-model Order {
-  id            Int     @default(autoincrement()) @id
-  orderNumber   String @unique
-  email         String
+model User {
+  id            String    @id @default(cuid())
   name          String
+  email         String @unique 
+  mobile        String @unique
+  emailVerified DateTime?
+  password      String? 
   address       String?
   city          String?
-  state         String?
-  pincode       String?
-  description   String?
-  mobile        String?
-  amount        String?
-  discount      String?
-  shipping      String?
-  totalAmount   String?
-  orderItem     String
-  orderStatus   String?
-  paymentId     String?
-  paymentStatus String?
-  orderDate     DateTime  @default(now()) 
-  orderDispatchDate String?  
+  state         String? 
+  image         String?
+  userType      String?  
+  userStatus    String?
+  fcmToken      String?
+  createdAt     DateTime  @default(now())  
+  accounts      Account[]
+  sessions      Session[]
+  verificationTokens    VerificationToken[]
+  feedbacks    Feedback[]
+  posts        Post[]
+  postLikes    PostLike[]
+  comments     Comment[]
 }
-
-model ShiprocketToken {
-  id            Int     @default(autoincrement()) @id
-  tokenDate     DateTime  @default(now())  
-  token         String
-}
-
 
 
 
@@ -84,21 +79,141 @@ model VerificationToken {
 }
 
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  password      String? 
+
+model Order {
+  id            Int     @default(autoincrement()) @id
+  orderNumber   String @unique
+  email         String
+  name          String
   address       String?
   city          String?
-  state         String?  
-  mobile        String? @unique
+  state         String?
+  pincode       String?
+  description   String?
+  mobile        String?
+  amount        String?
+  discount      String?
+  shipping      String?
+  totalAmount   String?
+  orderItem     String
+  orderStatus   String?
+  paymentId     String?
+  paymentStatus String?
+  orderDate     DateTime  @default(now()) 
+  orderDispatchDate String?  
+}
+
+model ShiprocketToken {
+  id            Int     @default(autoincrement()) @id
+  tokenDate     DateTime  @default(now())  
+  token         String
+}
+
+model Feedback {
+   id            Int   @id @default(autoincrement())
+   name          String
+   mobile        String
+   email         String?
+   message       String
+   category      String
+   messagePhoto  String?
+   status        String @default("Created") 
+   createdAt     DateTime  @default(now()) 
+   photo         User @relation(fields: [mobile], references: [mobile])
+}
+
+
+
+model Post {
+  id            String    @id @default(cuid())
+  title         String @unique
+  description   String?
+  slug          String
+  content       String
+  category      String[]
+  subCategory   String[] 
+  tags          String[]
   image         String?
-  userType      String?  
-  userStatus    String?
-  createdAt     DateTime  @default(now())   
-  accounts      Account[]
-  sessions      Session[]
-  verificationTokens    VerificationToken[]
+  readingTime   String? 
+  status        String @default("Published") 
+  createdAt     DateTime  @default(now()) 
+  author        User   @relation(fields: [authorId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  authorId      String
+  postLikes     PostLike[]
+  postsComments PostsComment[]
+ 
+}
+
+
+model PostsComment {
+  id        String  @id @default(cuid())
+  comment   Comment @relation(fields: [commentId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  commentId String 
+  post      Post    @relation(fields: [postId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  postId    String 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+}
+
+
+model PostLike {
+  id     String @id @default(cuid())
+  post   Post   @relation(fields: [postId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  postId String 
+  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId String 
+
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @default(now()) 
+
+  @@unique([postId, userId])
+ 
+}
+
+
+model Comment {
+  id     String @id @default(cuid())
+  body   String @db.Text()
+
+  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId String 
+
+  parentCommentId String?  
+  parentComment   Comment?  @relation("CommentSubComments", fields: [parentCommentId], references: [id])
+  subComments     Comment[] @relation("CommentSubComments")
+
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @default(now())
+
+  postsComments         PostsComment[]
+
+}
+
+
+model Product {
+   id             Int   @id @default(autoincrement())
+   name           String @unique 
+   slug           String
+   description    String?
+   content        String?
+   link           String? 
+   marketPlace    String?
+   category       String[]
+   subCategory    String[] 
+   type           String[]
+   unit           String?
+   ratings        String?   
+   image          String?
+   gallery        String[]
+   inStock        Int @default(0)
+   salePrice      Int  @default(0)
+   price          Int  @default(0)
+   discount       Int  @default(0)
+   status         String @default("Active")
+   createdAt      DateTime  @default(now()) 
+  
+   
+  @@index(fields: [name,type])
 }
