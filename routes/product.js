@@ -1,5 +1,6 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
+const { redisCachingMiddleware } = require("../middleware/redis");
 const path = require("path");
 const fs = require("fs/promises");
 const { IncomingForm } = require("formidable");
@@ -144,7 +145,7 @@ router.get("/list/:category", async (req, res) => {
   }
 });
 
-router.get("/list", async (req, res) => {
+router.get("/list", redisCachingMiddleware(), async (req, res) => {
   let page = req.query.page || 1;
   let limit = req.query.limit || 25;
 
